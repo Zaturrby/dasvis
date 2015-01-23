@@ -139,16 +139,6 @@ module.exports = function (grunt) {
       ]
     },
 
-    // Mocha testing framework configuration options
-    mocha: {
-      all: {
-        options: {
-          run: true,
-          urls: ['http://<%= connect.test.options.hostname %>:<%= connect.test.options.port %>/index.html']
-        }
-      }
-    },
-
     // Compiles Sass to CSS and generates necessary files if requested
     sass: {
       options: {
@@ -415,8 +405,7 @@ module.exports = function (grunt) {
     }
 
     grunt.task.run([
-      'connect:test',
-      'mocha'
+      'connect:test'
     ]);
   });
 

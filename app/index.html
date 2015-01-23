@@ -99,23 +99,15 @@
     <script>
 
 
-      d3.json("data_clean_firstpart.json", function(err, dasdata) { 
-
-        // Tooltip function
-        var performTooltip = function(){
-          jQuery('.voyage').tooltipster();
-        };
+      d3.json("data_clean_firstpart.json", function(err, data) { 
 
         // Manipulating dataset
-        var data = dasdata;
         var mutatedData = d3.nest()
           .key(function(d) { return d.year;})
           .entries(data);
 
         // Adding the boats inside the jaarbalken container
         var jaarbalk = d3.select(".jaarbalken").selectAll("li.jaarcontainer").data(mutatedData);
-
-        console.log(mutatedData[25, 30])
 
         // Creating a single year
         jaarbalk.enter()
@@ -158,27 +150,68 @@
               "width": function(d) { return (d.tonnage) * 0.035 + "px"}
             })
 
+            // People within a single voyage
+            .each(function(dVoyage){
 
-            // Robert Jan gedeelte
-            .selectAll()
-              .data(dpeople)
-              .filter(function(dTypeOfPerson){
-                  if(Total && null){
-                      return false;
-                  } else {
-                      return true;
-                  }
-              })
-              .enter()
-              .append('div')
-              )
-              .classed({
-                  "groupOfPeople": true
-              })
-              .style(
-                  width: ammountOfPeople
-              )
-    
+              console.log(dVoyage);
+
+              jQuery.map(Object.keys(dVoyage.people), function(group){
+                if (group != "Total" || group.length != 0) {
+                  console.log(group);
+                } else {
+                  console.warn(group);
+                }
+              });
+
+
+
+              // d3.select(this) // this is a single voyage
+              //   .selectAll('div.peopleType') 
+              //   .data(selectedVoyages)
+              //   .enter()
+              //   .append('div');
+
+                // .enter()
+                // .filter(function(d){
+                //     console.log(d) ;
+                //     // if(Total && null){
+                //     //     console.log("true");
+                //     //     return false;
+                //     // } else {
+                //     //     console.log("false");
+                //     //     return true;
+                //     // }
+                // });
+                // console.log("bye");
+              // .enter()
+              // .append('div')
+              // )
+              // .classed({
+              //     "groupOfPeople": true
+              // })
+              // .style(
+              //     width: ammountOfPeople
+              // )
+
+
+
+            });
+
+
+          });
+
+
+
+
+
+
+
+
+
+
+
+
+
             // Further specify the voyage chart
             // First case (Soldiers & Seafarers)
 
@@ -246,6 +279,11 @@
       }); 
 
 
+      // Tooltip function
+      function performTooltip(){
+        jQuery('.voyage').tooltipster();
+      };
+
 
       // Begin data filter
       $.noConflict();
@@ -278,22 +316,9 @@
             $(".jaarbalken div").show();
             // Non related element will be hidden after input
             $(".jaarbalken div").not("[data-arrival*="+ input +"]").hide();
-          });
-
-
+        });
       });
 
-
-      // (function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
-      // function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;
-      // e=o.createElement(i);r=o.getElementsByTagName(i)[0];
-      // e.src='//www.google-analytics.com/analytics.js';
-      // r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));
-      // ga('create','UA-XXXXX-X');ga('send','pageview');
-
-
     </script>
-
-        
 </body>
 </html>
