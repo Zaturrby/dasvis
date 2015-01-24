@@ -103,168 +103,115 @@
 
         // Manipulating dataset
         var mutatedData = d3.nest()
-          .key(function(d) { return d.year;})
-          .entries(data);
+                            .key(function(d) { return d.year;})
+                            .entries(data);
 
         // Adding the boats inside the jaarbalken container
-        var jaarbalk = d3.select(".jaarbalken").selectAll("li.jaarcontainer").data(mutatedData);
+        var jaarbalk = d3.select(".jaarbalken")
+                        .selectAll("li.jaarcontainer")
+                        .data(mutatedData);
 
         // Creating a single year
         jaarbalk.enter()
-          .append("li")
-          .attr("class", function(djaar) { return "jaar" + (djaar.values[0].year) }) // Year as class
-          .classed({
-            "jaarcontainer": true
-          })
+                .append("li")
+                .attr("class", function(djaar) { return "jaar" + (djaar.values[0].year) }) // Year as class
+                .classed({
+                  "jaarcontainer": true
+                })
 
-          // Append the year & voyage chart inside li
-          .each(function(d) { 
-            d3.select(this)
+                // Append the year & voyage chart inside li
+                .each(function(d) { 
+                  d3.select(this)
 
-            // Append only the year
-            .append("span")
-            .classed("jaartaldiv", true)
-            .html(function(djaar) { return (djaar.values[0].year) })
+                    // Append only the year
+                    .append("span")
+                    .classed("jaartaldiv", true)
+                    .html(function(djaar) { return (djaar.values[0].year) })
 
-            // Append voyage chart (empty)
-            d3.select(this)
-            .selectAll('div.balk')
-            .data( function(djaar){
-              return djaar.values
-            })
-            .enter()
-            .append('div')
-            .attr({
-              "class": function(did) { return (did.id) },
-              "data-departure": function(d) { return (d.departurePlace) },
-              "data-arrival": function(dship) { return (dship.arrivalPlace) },
-              "data-ship": function(dship) { return (dship.shipName) },
-              "data-tonnage": function(dship) { return (dship.tonnage)},
-              "title": function(d) { return (d.shipName + " arrival: " + d.arrivalPlace + " tonnage: " + d.tonnage)}
-            })      
-            .classed({
-              "voyage": true, 
-              "balk": true
-            })
-            .style({
-              "width": function(d) { return (d.tonnage) * 0.035 + "px"}
-            })
+                    // Append voyage chart (empty)
+                    d3.select(this)
+                    .selectAll('div.balk')
+                    .data( function(djaar){
+                      return djaar.values
+                    })
+                    .enter()
+                    .append('div')
+                    .attr({
+                      "class": function(did) { return (did.id) },
+                      "data-departure": function(d) { return (d.departurePlace) },
+                      "data-arrival": function(dship) { return (dship.arrivalPlace) },
+                      "data-ship": function(dship) { return (dship.shipName) },
+                      "data-tonnage": function(dship) { return (dship.tonnage)},
+                      "title": function(d) { return (d.shipName + " arrival: " + d.arrivalPlace + " tonnage: " + d.tonnage)}
+                    })      
+                    .classed({
+                      "voyage": true, 
+                      "balk": true
+                    })
+                    .style({
+                      "width": function(d) { return (d.tonnage) * 0.035 + "px"}
+                    })
 
-            // People within a single voyage
-            .each(function(dVoyage){
+                    // The next part does something with the people in a single voyage.
+                    .each(function(voyage){
+                      
+                      // Construction an array with the object keys of the groups.
+                      var checkedVoyage = jQuery.map(Object.keys(voyage.people), function callback(groupKey){
+                        // Checking if the object contains the correct keys
+                        if (groupKey != "Total" && groupKey != "undefined") {
+                          return groupKey;
+                        } else {
+                          return [];
+                        }
+                      });
 
-              console.log(dVoyage);
+                      // Append the divs for each of the groups
+                      d3.select(this) // this is the voyage element
+                        .selectAll('div.peopleType')
+                        /* 
+                        Here i'm doing something hacky... I'm only binding the object keys to the elements!
+                        This is mostly lazyness. This array was already constructed. We could have made D3 run
+                        on a conditional basis too, and bind the group. Performance wise this might've been a (little) bit
+                        better. However, binding the 'right' context, in this case the group, would be useless.
+                        The calculation needs the context of the other groups. To do this right... You'd need to preform
+                        the calculation beforehand and add the result to the dataset. You could even do this with node,
+                        which would increase loadtimes alot!
+                        */
+                        .data(checkedVoyage) 
+                        .enter()
+                        .append('div')  
+                        .attr({
+                          'class': function(groupKey){
+                            return groupKey;
+                          }
+                        })
+                        .style({
+                          'width': function(groupKey){
+                              // Calculate the total amount of people
+                              var totalValue = 0;
+                              jQuery.each(voyage.people, function(groupKey, groupValues){
+                                totalValue += parseFloat(groupValues.I);
+                              });
 
-              jQuery.map(Object.keys(dVoyage.people), function(group){
-                if (group != "Total" || group.length != 0) {
-                  console.log(group);
-                } else {
-                  console.warn(group);
-                }
-              });
+                              // Calulate the rest and return it to the width styling
 
-
-
-              // d3.select(this) // this is a single voyage
-              //   .selectAll('div.peopleType') 
-              //   .data(selectedVoyages)
-              //   .enter()
-              //   .append('div');
-
-                // .enter()
-                // .filter(function(d){
-                //     console.log(d) ;
-                //     // if(Total && null){
-                //     //     console.log("true");
-                //     //     return false;
-                //     // } else {
-                //     //     console.log("false");
-                //     //     return true;
-                //     // }
-                // });
-                // console.log("bye");
-              // .enter()
-              // .append('div')
-              // )
-              // .classed({
-              //     "groupOfPeople": true
-              // })
-              // .style(
-              //     width: ammountOfPeople
-              // )
-
-
-
-            });
-
-
-          });
-
-
-
-
-
-
-
-
-
-
-
-
-
-            // Further specify the voyage chart
-            // First case (Soldiers & Seafarers)
-
-
-
-
-
-            
-          //   .filter(function(d){
-          //     if {
-          //       d.people
-          //     } else {
-
-          //     }
-          //     console.log(d)
-          //     return d.people.Seafarers.I > 1 && d.people.Soldiers.I > 1 
-          //   })
-          //   .append('div')
-          //   .classed({
-          //     "segmentcontainer": true
-          //   })
-
-          //   // Putting the segments in
-          //   .each(function(d) {
-          //     d3.select(this)
-          //     .append('div')
-          //     .classed({"firstsegmentoftwo": true})
-          //     .style({
-          //       "width": function(d) {
-          //         return ( ( parseFloat(d.soldiers) / (parseFloat(d.soldiers) + parseFloat(d.seafarers)) ) * 100 + "%")
-          //       }
-          //     })
-
-          //     d3.select(this)
-          //     .append('div')
-          //     .classed({"secondsegmentoftwo": true})
-          //     .style({
-          //       "width": function(d) {
-          //         return ( ( parseFloat(d.seafarers) / (parseFloat(d.soldiers) + parseFloat(d.seafarers)) ) * 100 + "%")
-          //       }
-          //     })
-          //   })
-
-          //   // Add segments soldiers && seafa && passenger
-          //   .filter(function(d) {
-          //     return d.soldiers > 1 && d.seafarers > 1 && d.passengers > 1
-          //   })
-          //   .append('div')
-          //   .classed({
-          //     "doettiehetofdoettiehetniet": true
-          //   })
-          
-          // }); // End of second select this
+                              /* 
+                              This part of the calculation is tricky too. I'm excluding 738 voyages
+                              on the basis of a bad formatted people[groupKey].I's. I checked one,
+                              and there was no value in it. But the condition might be handled some other way.
+                              */
+                              if (isNaN(totalValue) == true) {
+                                // If the total cannot be calculated from the first number apply no width
+                                console.log("nan");
+                                return "0%";
+                              } else {
+                                // Calculate pecentage of total
+                                return (voyage.people[groupKey].I / totalValue * 100) + "%";
+                              }
+                          }
+                        }); 
+                      });
+                });
 
           // Init tooltip
           performTooltip();
